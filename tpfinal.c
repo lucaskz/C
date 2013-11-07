@@ -89,7 +89,7 @@ int read_file(FILE *fin){
   if(!feof(fin)) printf("error de lectura del archivo");
 
 */
-
+return 0;
 }
 
 int main (int argc, char* argv[]){
