@@ -1,12 +1,21 @@
-#include <list.h>
+#include "list.h"
 #include <stdlib.h>
 
 void list_init(t_list *l){
-	*list=NULL;
+	*l=NULL;
 }
 
 short list_empty(t_list l){
 	return l==NULL;
+}
+
+short list_find(t_list l, t_data e){/*
+  while(l)
+  {
+    if (l->data == e) return 1;
+    l = l->next;
+  }
+  return 0;*/
 }
 
 t_data list_insert(t_list *l, t_data d){
@@ -24,7 +33,7 @@ t_data list_insert(t_list *l, t_data d){
 	return d;
 }
 
-t_data list_delete(t_list *l, t_data d){
+t_data list_delete(t_list *l, t_data d){/*
 	if(list_find(*l,d)){
 		t_list_node *prev = NULL, *node = *l;
 		while(node->next){
@@ -38,7 +47,7 @@ t_data list_delete(t_list *l, t_data d){
 		}
 		free(node);
 	}
-	return e;
+	return d;*/
 }
 
 void list_free(t_list *l){
