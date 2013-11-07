@@ -6,7 +6,51 @@
 #include "node_type.h"
 
 int read_file(FILE *fin){
+  
+  t_list list;
+  int flines=0,line_counter=0;
+  char *label,*timer,*text;
 
+  while(!feof(fin)){
+    if((fgets(line,sizeof(line),fin))==NULL){       // Si se encuentra error de lectura o feof 
+      if(feof(fin)) break;                          // Termina el loop si encuentra el fin
+      printf("error de lectura");
+    }
+    if(fline>2){
+      if (line_counter==0){
+        if(has_label(line)){                        // Primera linea es label .. 
+          *label=malloc(sizeof(line));
+          strcpy(*label,line);
+        }
+        else{
+          *timer=malloc(sizeof(line));               // Guardo timer (no tiene label)
+          strcpy(*timer,line);
+          line_counter++;                           // para considerar el proximo elemento como un texto
+        }
+      }
+      if(line_counter==1){                          //Guardo timer ( tiene label )
+        *timer=malloc(sizeof(line));
+        strcpy(*timer,line);              
+      }
+      if(line_counter=>2){
+        if(line_counter==2){
+          *text=malloc(sizeof(line));
+          strcpy(*text,line);          
+        }
+        else{
+          //concateno strings...
+        }
+      }
+      line_counter++;
+    }
+    flines++;
+  }
+
+
+
+
+
+/*                                        ----------- Vieja funcion 
   char line[100];
   int fline_number=0,line_counter=0;
   char block[100][100];
@@ -38,12 +82,14 @@ int read_file(FILE *fin){
     aux=aux->next;
   }
 
-/*  while (fgets(line, sizeof(line), fin) != NULL)
+  while (fgets(line, sizeof(line), fin) != NULL)
   {
     printf ("\n %s",line);
   }
   if(!feof(fin)) printf("error de lectura del archivo");
-*/return 0;
+
+*/
+
 }
 
 int main (int argc, char* argv[]){
