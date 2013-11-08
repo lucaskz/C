@@ -2,14 +2,14 @@
 #define _LIST_TYPE_H
 
 typedef struct{
-	char start_time[50];
-	char end_time[30];
-	char label[50];
-	char text[50];
+	char *start_time;
+	char *end_time;
+	char *label;
+	char *text;
 
 } t_data;
 
-t_data data_create( char [][100] , int);
+t_data data_create(char *,char *,char *);
 
 
 

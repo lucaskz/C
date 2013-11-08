@@ -4,48 +4,73 @@
 #include <string.h>
 #include "list.h"
 #include "node_type.h"
+#include <stdbool.h>
+#define SIZE 4096
+bool has_label(char *line){
+  return false;
+}
 
 int read_file(FILE *fin){
   
-  t_list list;
-  int flines=0,line_counter=0;
+  t_list list,aux;
+  int fline=0,line_counter=0;
   char *label,*timer,*text;
-
+  char line[SIZE];
+  list_init(&list);
   while(!feof(fin)){
     if((fgets(line,sizeof(line),fin))==NULL){       // Si se encuentra error de lectura o feof 
       if(feof(fin)) break;                          // Termina el loop si encuentra el fin
       printf("error de lectura");
     }
-    if(fline>2){
-      if (line_counter==0){
-        if(has_label(line)){                        // Primera linea es label .. 
-          *label=malloc(sizeof(line));
-          strcpy(*label,line);
-        }
-        else{
-          *timer=malloc(sizeof(line));               // Guardo timer (no tiene label)
-          strcpy(*timer,line);
-          line_counter++;                           // para considerar el proximo elemento como un texto
-        }
-      }
+    if ((line[strspn(line, " \t\v\r\n")] == '\0') && (fline>2)){
+      line_counter=-1;
+     // printf("\nmando nodo : %s",line);
+      list_insert(&list, data_create(label,timer,text));
+      
+
+    }
+    if(fline>=2){
       if(line_counter==1){                          //Guardo timer ( tiene label )
-        *timer=malloc(sizeof(line));
-        strcpy(*timer,line);              
+        timer=malloc(sizeof(line));
+        printf("\n linea: %d copio timer : %s ",fline,line);
+        strcpy(timer,line);              
       }
-      if(line_counter=>2){
+      if(line_counter>=2){
         if(line_counter==2){
-          *text=malloc(sizeof(line));
-          strcpy(*text,line);          
+          text=malloc(sizeof(line));
+          printf("\n linea: %d copio texto : %s ",fline,line);
+          strcpy(text,line);          
         }
         else{
           //concateno strings...
         }
       }
+      if (line_counter==0){
+        if(has_label(line)){                        // Primera linea es label .. 
+          label=malloc(sizeof(line));
+          printf("\n linea: %d copio label : %s ",fline,line);
+          strcpy(label,line);
+        }
+        else{
+          timer=malloc(sizeof(line));               // Guardo timer (no tiene label)
+          printf("\n linea: %d copio timer : %s ",fline,line);
+          strcpy(timer,line);
+          line_counter++;                           // para considerar el proximo elemento como un texto
+        }
+      }
       line_counter++;
     }
-    flines++;
+    fline++;
   }
 
+    aux=list;
+     //aux=aux->next;
+    printf("text %s",aux->data.text);
+  /*while(aux){
+    printf(" Start : %s  text : %s ",aux->data.start_time,aux->data.text);
+    aux=aux->next;
+  }
+*/
 
 
 

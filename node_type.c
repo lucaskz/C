@@ -3,17 +3,21 @@
 #include <string.h>
 #include <stdio.h>
 
-t_data data_create(char lines[][100], int line_counter){
+t_data data_create(char *label,char *timer,char *text){
   int i;
   
   t_data subtitle;
 
   // Si devuelve feof tiene etquieta
   //strcpy(subtitle.label,lines[0]);
-  strcpy(subtitle.start_time,lines[0]);
-  printf("line counter %d \n" ,line_counter);
-  for(i=1;i<=(line_counter-1);i++){
-    strcpy(subtitle.text,lines[i]);
-  }
+  //subtitle.label=malloc(sizeof(label));
+  //strcpy(subtitle.label,label);
+  
+  subtitle.start_time=malloc(sizeof(timer));
+  strcpy(subtitle.start_time,timer);
+
+  subtitle.text=malloc(sizeof(text));
+  strcpy(subtitle.text,text);
+
   return subtitle;
 }
