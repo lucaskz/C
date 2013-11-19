@@ -4,116 +4,82 @@
 #include <string.h>
 #include "list.h"
 #include "node_type.h"
-#include <stdbool.h>
-#define SIZE 4096
-bool has_label(char *line){
-  return false;
-}
+
 
 int read_file(FILE *fin){
   
-  t_list list,aux;
-  int fline=0,line_counter=0;
-  char *label,*timer,*text;
-  char line[SIZE];
-  list_init(&list);
-  while(!feof(fin)){
-    if((fgets(line,sizeof(line),fin))==NULL){       // Si se encuentra error de lectura o feof 
-      if(feof(fin)) break;                          // Termina el loop si encuentra el fin
-      printf("error de lectura");
-    }
-    if ((line[strspn(line, " \t\v\r\n")] == '\0') && (fline>2)){
-      line_counter=-1;
-     // printf("\nmando nodo : %s",line);
-      list_insert(&list, data_create(label,timer,text));
-      
+  t_list list;
+  char *buffer=NULL;
+  ssize_t leidos=0;
+  t_data subtitle;
+  size_t alocados = 10;
+  int tiempo_leido,indice=1;
 
-    }
-    if(fline>=2){
-      if(line_counter==1){                          //Guardo timer ( tiene label )
-        timer=malloc(sizeof(line));
-        printf("\n linea: %d copio timer : %s ",fline,line);
-        strcpy(timer,line);              
+
+
+  while(!feof(fin) && leidos >=0 ){
+    tiempo_leido=0;
+    while(leidos >= 0 && !tiempo_leido){
+      leidos = getline(&buffer,&alocados,fin);
+      printf("\n buffer :  %s",buffer);
+      int tiempo = es_tiempo(buffer);
+      if ( tiempo ){
+        if(tiempo==1){
+          set_time_hour(buffer,&subtitle);
+        }else{
+          set_time(buffer,&subtitle);
+        }
+        tiempo_leido=1;
+      }else {
+        set_label(buffer,&subtitle);
       }
-      if(line_counter>=2){
-        if(line_counter==2){
-          text=malloc(sizeof(line));
-          printf("\n linea: %d copio texto : %s ",fline,line);
-          strcpy(text,line);          
-        }
-        else{
-          //concateno strings...
-        }
-      }
-      if (line_counter==0){
-        if(has_label(line)){                        // Primera linea es label .. 
-          label=malloc(sizeof(line));
-          printf("\n linea: %d copio label : %s ",fline,line);
-          strcpy(label,line);
-        }
-        else{
-          timer=malloc(sizeof(line));               // Guardo timer (no tiene label)
-          printf("\n linea: %d copio timer : %s ",fline,line);
-          strcpy(timer,line);
-          line_counter++;                           // para considerar el proximo elemento como un texto
-        }
-      }
-      line_counter++;
+
     }
-    fline++;
-  }
-
-    aux=list;
-     //aux=aux->next;
-    printf("text %s",aux->data.text);
-  /*while(aux){
-    printf(" Start : %s  text : %s ",aux->data.start_time,aux->data.text);
-    aux=aux->next;
-  }
-*/
-
-
-
-
-/*                                        ----------- Vieja funcion 
-  char line[100];
-  int fline_number=0,line_counter=0;
-  char block[100][100];
-  int temp=0;
-  t_list list,aux;
-  
-  list_init(&list);
-
-  while(!feof(fin)){
-    if((fgets(line,sizeof(line),fin))==NULL){       // Si se encuentra error de lectura o feof 
-      if(feof(fin)) break;                          // Termina el loop si encuentra el fin
-      printf("error de lectura");
-    } 
-    if(fline_number>=2){
-      strcpy(block[line_counter],line);                    // Armo mi arreglo temporal
-      if (line[strspn(line, " \t\v\r\n")] == '\0'){
-        list_insert(&list, data_create(block,line_counter));  // Creo un nodo y lo inserto.
-        line_counter=0;
+    if(!tiempo_leido) {
+      printf("error de estructura");
+      return 0;
+    }
+    printf("\n encontre tiempo ");
+    int size_texto=0,size_anterior = 0 ;
+    char *texto = NULL;
+    while(leidos >= 0){
+      printf("-- termine de buscar tiempo busco texto.. \n");
+      leidos = getline(&buffer,&alocados,fin);  
+      printf("\n buffer : %s",buffer);
+      printf("\n bufferTEXTO : %s",texto);
+      if(*buffer == '\n' || *buffer == '\r'){  // inserto en la lista,es un elemento
+        set_indice(indice,&subtitle);
+        printf("\n Tamaño anterior! : %d",size_anterior);
+        set_texto(texto,&subtitle,size_anterior);
+        printf("\n ------------- setie texto");
+        list_insert(&list,subtitle);  // insertando..
+        printf("\n ----------     inserte en lista -------------- \n");
+        break;
+      }
+      if(size_texto == 0){
+        texto = malloc((leidos + 1)* sizeof(char));
+        strcpy(texto,buffer);
+        size_texto = leidos;
       }
       else{
-        line_counter++;
+        texto = realloc(texto,(size_texto + leidos + 1)* sizeof(char));
+        size_anterior=size_texto+leidos;
+        strcat(texto,buffer);
       }
     }
-    fline_number++;
-  }  
-  aux=list;
-  while(aux){
-    printf(" Start : %s  text : %s ",aux->data.start_time,aux->data.text);
-    aux=aux->next;
+    free(buffer);buffer=NULL;
+    free(texto);texto=NULL;
+    //subtitle_free(&subtitle);
+    indice++;
+    printf("\nfinal de funcion");
+     
   }
 
-  while (fgets(line, sizeof(line), fin) != NULL)
-  {
-    printf ("\n %s",line);
-  }
-  if(!feof(fin)) printf("error de lectura del archivo");
 
-*/
+printf("\n\n <<< IMPRIMIENDO LISTA >>> ");
+
+  
+
 return 0;
 }
 

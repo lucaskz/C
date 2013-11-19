@@ -1,5 +1,6 @@
 #include "list.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 void list_init(t_list *l){
 	*l=NULL;
@@ -25,11 +26,11 @@ t_data list_insert(t_list *l, t_data d){
 	if(*l==NULL)
 		*l = node;
 	else{
-		t_list_node *aux = *l;
-		while(aux->next)
-			aux = aux->next;
-		aux->next = node;
+    	t_list_node *n = *l;
+   	 	while (n->next) n = n->next;
+   		 n->next = node;
 	}
+printf("\n Aca inserto!");
 	return d;
 }
 
