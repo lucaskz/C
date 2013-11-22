@@ -28,4 +28,6 @@ int subtitle_free(t_data * );
 
 int es_tiempo(char *);
 
+t_data copy_data(t_data);
+
 #endif

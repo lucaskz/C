@@ -52,7 +52,7 @@ int read_file(FILE *fin){
         printf("\n Tamaño anterior! : %d",size_anterior);
         set_texto(texto,&subtitle,size_anterior);
         printf("\n ------------- setie texto");
-        list_insert(&list,subtitle);  // insertando..
+        list_insert(&list,copy_data(subtitle));  // insertando..
         printf("\n ----------     inserte en lista -------------- \n");
         break;
       }

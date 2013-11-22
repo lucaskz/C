@@ -10,6 +10,24 @@ int subtitle_free(t_data *subtitle ){
   return 1;
 }
 
+t_data copy_data(t_data subtitle){
+
+  t_data copy;
+  copy.start.hora=subtitle.start.hora;
+  copy.start.min=subtitle.start.min;
+  copy.start.seg=subtitle.start.seg;
+  copy.start.mil=subtitle.start.mil;
+  copy.end.hora=subtitle.end.hora;
+  copy.end.min=subtitle.end.min;
+  copy.end.seg=subtitle.end.seg;
+  copy.end.mil=subtitle.end.mil;
+  copy.label=malloc((strlen(subtitle.label)+1) * sizeof(char));
+  strcpy(copy.label,subtitle.label);
+  copy.text=malloc((strlen(subtitle.text)+1) * sizeof(char));
+  strcpy(copy.text,subtitle.text);
+  return copy;
+}
+
 t_data set_time_hour(char *buffer, t_data *subtitle){
   sscanf(buffer, "%2d:%2d:%2d.%3d --> %2d:%2d:%2d.%3d", &subtitle->start.hora, &subtitle->start.min,
          &subtitle->start.seg,&subtitle->start.mil,&subtitle->end.hora,
@@ -20,6 +38,8 @@ t_data set_time_hour(char *buffer, t_data *subtitle){
 t_data set_time(char *buffer, t_data *subtitle){
   sscanf(buffer, "%2d:%2d.%3d --> %2d:%2d.%3d", &subtitle->start.min,
          &subtitle->start.seg,&subtitle->start.mil,&subtitle->end.min,&subtitle->end.seg,&subtitle->end.mil);
+  subtitle->start.hora=00;
+  subtitle->end.hora=00;
   return (*subtitle);
 }
 
