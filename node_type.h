@@ -18,7 +18,7 @@ t_data set_time(char * ,t_data *);
 
 t_data set_time_hour(char * ,t_data *);
 
-t_data set_texto(char * ,t_data *, int);
+t_data set_texto(char * ,t_data *,int);
 
 t_data set_label(char * ,t_data *);
 

@@ -30,7 +30,6 @@ t_data list_insert(t_list *l, t_data d){
    	 	while (n->next) n = n->next;
    		 n->next = node;
 	}
-printf("\n Aca inserto!");
 	return d;
 }
 

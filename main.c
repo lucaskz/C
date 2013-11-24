@@ -4,18 +4,28 @@
 #include "list.h"
 #include "node_type.h"
 
+int create_file(FILE *fout,t_list *list){
+    t_list aux = list;
+    while(aux){
+        fwrite(&aux->data,sizeof(t_data),1,fout);
+        aux=aux->next;
+    }
+    fclose(fout);
+    return 1;
+}
 
-int read_file(FILE *fin){
+int read_file(FILE *fin,t_list *list){
   
-  t_list list;
-  char *buffer=NULL;
+  char *buffer=NULL, *texto = NULL;
   ssize_t leidos=0;
   t_data subtitle;
   size_t alocados = 10;
   int tiempo_leido,indice=1;
+  int size_texto=0;
+  
 
  
-          
+  list_init(list);        
   subtitle_init(&subtitle);
   while(!feof(fin) && leidos >=0 ){
     tiempo_leido=0;
@@ -37,14 +47,14 @@ int read_file(FILE *fin){
       printf("error de estructura");
       return 0;
     }
-    int size_texto=0,size_anterior = 0 ;
-    char *texto = NULL;
+    
+    
     while(leidos >= 0){
-      leidos = getline(&buffer,&alocados,fin);  
-      if(*buffer == '\n' || *buffer == '\r'){  // inserto en la lista,es un elemento
+      leidos = getline(&buffer,&alocados,fin);
+      if(*buffer == '\n' || *buffer == '\r' || leidos==-1){  // inserto en la lista,es un elemento
         set_indice(indice,&subtitle);
-        set_texto(texto,&subtitle,size_anterior);
-        list_insert(&list,copy_data(subtitle));  // insertando..
+        set_texto(texto,&subtitle,size_texto);
+        list_insert(list,copy_data(subtitle));  // insertando..
         break;
       }
       if(size_texto == 0){
@@ -53,26 +63,31 @@ int read_file(FILE *fin){
         size_texto = leidos;
       }
       else{
-        texto = realloc(texto,(size_texto + leidos + 1)* sizeof(char));
-        size_anterior=size_texto+leidos;
+        size_texto=size_texto+leidos; 
+        texto = realloc(texto,(size_texto+1)* sizeof(char));
         strcat(texto,buffer);
+        
       }
     }
-    free(buffer);buffer=NULL;
-    free(texto);texto=NULL;
-   
+    free(buffer);
+    buffer=NULL;
+    free(texto);
+    texto=NULL;   
     indice++;
+    size_texto=0;
      
   }
   // subtitle_free(&subtitle);
+  
+  
 
-
-return 0;
+return 1;
 }
 
 int main (int argc, char* argv[]){
   
   FILE *fin,*fout;
+  t_list subtitle_input;
 
   if( argc <= 1 ){
 	printf("Faltan parametros use -help para mas ayuda");
@@ -101,10 +116,10 @@ int main (int argc, char* argv[]){
   for(i=1; i < argc;i++){
   	if ((argv[i][0]=='-') && (strlen(argv[i])==2) ){
   	  switch (argv[i][1]) {
-  	    case 'f' : i++;read_file(fin);break;
+  	    case 'f' : i++;read_file(fin,&subtitle_input); break;
   	    case 'v' : printf("se envio v");break;
   	    case 'm' : printf("se envio m");break;
-  	    case 'o' : i++;break;
+  	    case 'o' : i++;create_file(fout,subtitle_input);break;
   	    case 's' : printf("se envio s");break;
   	    case 'b' : printf("se envio b");break;
   	    case 'd' : printf("se envio d");break;

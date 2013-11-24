@@ -68,11 +68,8 @@ t_data set_label(char *label, t_data *subtitle){
   return (*subtitle);
 }
 
-t_data set_texto(char *text, t_data *subtitle,int tam){
-  if(tam == 0 ){
-    subtitle->text = malloc((strlen(text)+1) * sizeof(char));}
-  else{
-    subtitle->text = realloc(subtitle->text,(strlen(text)+1) * sizeof(char));}
+t_data set_texto(char *text, t_data *subtitle,int size){
+  subtitle->text = malloc((size + 1)* sizeof(char));
   strcpy(subtitle->text,text);
   return (*subtitle);
 }
