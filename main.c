@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,13 +14,13 @@ int read_file(FILE *fin){
   size_t alocados = 10;
   int tiempo_leido,indice=1;
 
-
-
+ 
+          
+  subtitle_init(&subtitle);
   while(!feof(fin) && leidos >=0 ){
     tiempo_leido=0;
     while(leidos >= 0 && !tiempo_leido){
       leidos = getline(&buffer,&alocados,fin);
-      printf("\n buffer :  %s",buffer);
       int tiempo = es_tiempo(buffer);
       if ( tiempo ){
         if(tiempo==1){
@@ -33,27 +32,19 @@ int read_file(FILE *fin){
       }else {
         set_label(buffer,&subtitle);
       }
-
     }
     if(!tiempo_leido) {
       printf("error de estructura");
       return 0;
     }
-    printf("\n encontre tiempo ");
     int size_texto=0,size_anterior = 0 ;
     char *texto = NULL;
     while(leidos >= 0){
-      printf("-- termine de buscar tiempo busco texto.. \n");
       leidos = getline(&buffer,&alocados,fin);  
-      printf("\n buffer : %s",buffer);
-      printf("\n bufferTEXTO : %s",texto);
       if(*buffer == '\n' || *buffer == '\r'){  // inserto en la lista,es un elemento
         set_indice(indice,&subtitle);
-        printf("\n Tamaño anterior! : %d",size_anterior);
         set_texto(texto,&subtitle,size_anterior);
-        printf("\n ------------- setie texto");
         list_insert(&list,copy_data(subtitle));  // insertando..
-        printf("\n ----------     inserte en lista -------------- \n");
         break;
       }
       if(size_texto == 0){
@@ -69,16 +60,12 @@ int read_file(FILE *fin){
     }
     free(buffer);buffer=NULL;
     free(texto);texto=NULL;
-    //subtitle_free(&subtitle);
+   
     indice++;
-    printf("\nfinal de funcion");
      
   }
+  // subtitle_free(&subtitle);
 
-
-printf("\n\n <<< IMPRIMIENDO LISTA >>> ");
-
-  
 
 return 0;
 }

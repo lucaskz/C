@@ -30,4 +30,6 @@ int es_tiempo(char *);
 
 t_data copy_data(t_data);
 
+int subtitle_init(t_data *);
+
 #endif
