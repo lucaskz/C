@@ -14,6 +14,35 @@ int create_file(FILE *fout,t_list *list){
     return 1;
 }
 
+int delete_tags(char *texto){
+    int num=0;
+    int init=-1;
+    int close=-1;
+    while(texto[num]!='\0'){
+        if((texto[num]=='<') && (init==-1)){
+            init=num;
+        }        
+        if((texto[num]=='>')&&(close==-1)){
+            close=num;
+        }
+        if(init!=-1 && close!=-1){
+            
+        }
+        num++;
+    }
+    return 0;
+}
+
+
+t_list verify(t_list *list){
+    t_list aux= list;
+    int num=0;
+    while(aux){
+        delete_tags(aux->data.text);
+    };
+    return list;
+}
+
 int read_file(FILE *fin,t_list *list){
   
   char *buffer=NULL, *texto = NULL;
@@ -119,7 +148,7 @@ int main (int argc, char* argv[]){
   	    case 'f' : i++;read_file(fin,&subtitle_input); break;
   	    case 'v' : printf("se envio v");break;
   	    case 'm' : printf("se envio m");break;
-  	    case 'o' : i++;create_file(fout,subtitle_input);break;
+  	    case 'o' : i++;create_file(fout,&subtitle_input);break;
   	    case 's' : printf("se envio s");break;
   	    case 'b' : printf("se envio b");break;
   	    case 'd' : printf("se envio d");break;
