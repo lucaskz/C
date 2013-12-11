@@ -5,7 +5,7 @@
 #include "node_type.h"
 
 int create_file(FILE *fout,t_list *list){
-    t_list aux = list;
+    t_list_node *aux = *list;
     while(aux){
         fwrite(&aux->data,sizeof(t_data),1,fout);
         aux=aux->next;
@@ -13,34 +13,101 @@ int create_file(FILE *fout,t_list *list){
     fclose(fout);
     return 1;
 }
+int es_starter(char *texto,int init, int close){
+    int aux=init;
+    aux++;
+    while((texto[aux]==' ')&&(aux<close)){
+        aux++;
+    }
+    if( aux<close && texto[aux]!='/' ){
+        if ( aux+1 <= close ){
+            return 1;
+        }
+    }
+            
+    return 0;
+}
 
-int delete_tags(char *texto){
-    int num=0;
+int same_tag(char *texto,int init,int close,int init_2,int close_2){
+
+    while( (texto[init]==' ') && init < close ){
+        init++;
+    }
+    while ( (texto[init_2]==' ') && init_2<close_2 ){
+        init_2++;
+    }
+    if(texto[init_2]!= '/' || init==close || init_2 == close_2) return 0; // no es cierre de tag. 
+    
+    if( init_2 < close_2 )  // si es menor directamente retorno q no es tag  ;deberia estar en /
+        init_2++;
+    else
+        return 0;  
+    
+    while( texto[init] == texto[init_2] && ( init < close || init_2 < close_2 ) ){
+        
+        init++;
+        init_2++;
+    }
+    if (  texto[init] != texto[init_2] &&  init < close   )   // son distintos y no llegue al final del < ... > 
+        return 0;
+    
+    return 1;
+}
+
+int delete_tags(char *texto, int inicio ,int  fin ){
+    //int num=inicio;
     int init=-1;
     int close=-1;
-    while(texto[num]!='\0'){
-        if((texto[num]=='<') && (init==-1)){
-            init=num;
+    int encontre=0;
+    while (( (inicio<fin) || (texto[inicio]!='\0')) && (! encontre ) ) { // por si falla strlen.
+        if((texto[inicio]=='<') && (init==-1)){
+            init=inicio;
         }        
-        if((texto[num]=='>')&&(close==-1)){
-            close=num;
+        if((texto[inicio]=='>')&&(close==-1)){
+            close=inicio;
         }
         if(init!=-1 && close!=-1){
-            
+            if(es_starter(texto,init,close))
+                 encontre=1;
+            else{
+                init=-1;
+                close=-1;
+            }
         }
-        num++;
+        inicio++;
     }
+    int encontre2=0;
+    int init_2=-1;
+    int close_2=-1;
+    while (( (inicio<fin) || (texto[inicio]!='\0')) && ( ! encontre2 ) ) { // por si falla strlen.
+        if((texto[inicio]=='<') && (init_2==-1)){
+            init_2=inicio;
+        }        
+        if((texto[inicio]=='>')&&(close_2==-1)){
+            close_2=inicio;
+        }
+        if(init_2!=-1 && close_2!=-1){
+            if ( same_tag(texto,init+1,close,init_2+1,close_2)){
+                delete_tags(texto,close+1,fin);
+                encontre2=1;
+            }
+            else{
+                  init_2=-1;
+                  close_2=1;
+            }        
+        }
+        inicio++;
+    }    
     return 0;
 }
 
 
-t_list verify(t_list *list){
-    t_list aux= list;
-    int num=0;
+int  verify(t_list *list){
+    t_list_node *aux = *list;
     while(aux){
-        delete_tags(aux->data.text);
+        delete_tags(aux->data.text , 0 , strlen(aux->data.text)); // 0 : inicio del string ; strlen hasta donde
     };
-    return list;
+    return 1;
 }
 
 int read_file(FILE *fin,t_list *list){
@@ -146,7 +213,7 @@ int main (int argc, char* argv[]){
   	if ((argv[i][0]=='-') && (strlen(argv[i])==2) ){
   	  switch (argv[i][1]) {
   	    case 'f' : i++;read_file(fin,&subtitle_input); break;
-  	    case 'v' : printf("se envio v");break;
+  	    case 'v' : verify(&subtitle_input);break;
   	    case 'm' : printf("se envio m");break;
   	    case 'o' : i++;create_file(fout,&subtitle_input);break;
   	    case 's' : printf("se envio s");break;
