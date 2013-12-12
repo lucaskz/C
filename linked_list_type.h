@@ -1,6 +1,7 @@
 #ifndef _LIST_TYPE_LINKED_NODES_H
 #define _LIST_TYPE_LINKED_NODES_H
-#include "node_type.h"
+#include "list_type.h"
+
 
 typedef struct t_list_node{
   struct t_list_node *next;

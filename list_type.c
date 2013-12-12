@@ -1,7 +1,7 @@
-#include "node_type.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "list.h"
 
 int subtitle_free(t_data *subtitle ){
     if(subtitle->text!= NULL) free(subtitle->text);   
@@ -13,15 +13,15 @@ int subtitle_free(t_data *subtitle ){
 int subtitle_init(t_data *subtitle){
     subtitle->label=NULL;
     subtitle->text=NULL;
-    subtitle->indice=0;
-    subtitle->start.hora=0;
-    subtitle->start.seg=0;
-    subtitle->start.min=0;
-    subtitle->start.mil=0;
-    subtitle->end.hora=0;
-    subtitle->end.min=0;
-    subtitle->end.seg=0;
-    subtitle->end.mil=0;
+    subtitle->indice=00;
+    subtitle->start.hora=00;
+    subtitle->start.seg=00;
+    subtitle->start.min=00;
+    subtitle->start.mil=000;
+    subtitle->end.hora=00;
+    subtitle->end.min=00;
+    subtitle->end.seg=00;
+    subtitle->end.mil=000;
     return 1;
 }
 

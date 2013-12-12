@@ -1,7 +1,10 @@
 #ifndef _T_LIST_H
 #define _T_LIST_H
+#include "list_type.h"
 
+#ifndef _LIST_TYPE_LINKED_NODES_H
 #include "linked_list_type.h"
+#endif
 
 
 void list_init(t_list *);

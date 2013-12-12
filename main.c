@@ -2,14 +2,21 @@
 #include <stdio.h>
 #include <string.h>
 #include "list.h"
-#include "node_type.h"
+#include "list_iterator.h"
 
-int create_file(FILE *fout,t_list *list){
-    t_list_node *aux = *list;
-    while(aux){
-        fwrite(&aux->data,sizeof(t_data),1,fout);
-        aux=aux->next;
-    }
+
+int create_file_srt(FILE *fout,t_list *list){
+    t_iterator it;
+    for (it=list_iterator_init(*list); !list_iterator_end(it); list_iterator_next(&it))
+    {
+     
+        fprintf(fout,"%d\n%.2d:%.2d:%.2d,%.3d --> %.2d:%.2d:%.2d,%.3d\n%s\n",list_iterator_data(it).indice,
+                                                            list_iterator_data(it).start.hora,list_iterator_data(it).start.min,
+                                                            list_iterator_data(it).start.seg,list_iterator_data(it).start.mil,
+                                                            list_iterator_data(it).end.hora,list_iterator_data(it).end.min,list_iterator_data(it).end.seg,
+                                                            list_iterator_data(it).end.mil,
+                                                            list_iterator_data(it).text);
+    } 
     fclose(fout);
     return 1;
 }
@@ -23,83 +30,6 @@ int es_close(char *texto,int init, int close){
             
     return 0;
 }
-
-/*
-int same_tag(char *texto,int init,int close,int init_2,int close_2){
-
-    while( (texto[init]==' ') && init < close ){
-        init++;
-    }
-    while ( (texto[init_2]==' ') && init_2<close_2 ){
-        init_2++;
-    }
-    if(texto[init_2]!= '/' || init==close || init_2 == close_2) return 0; // no es cierre de tag. 
-    
-    if( init_2 < close_2 )  // si es menor directamente retorno q no es tag  ;deberia estar en /
-        init_2++;
-    else
-        return 0;  
-    
-    while( texto[init] == texto[init_2] && ( init < close || init_2 < close_2 ) ){
-        
-        init++;
-        init_2++;
-    }
-    if (  texto[init] != texto[init_2] &&  init < close   )   // son distintos y no llegue al final del < ... > 
-        return 0;
-    
-    return 1;
-}
-*/
-
-/*
-int delete_tags(char *texto, int inicio ,int  fin ){
-    //int num=inicio;
-    int init=-1;
-    int close=-1;
-    int encontre=0;
-    while (( (inicio<fin) || (texto[inicio]!='\0')) && (! encontre ) ) { // por si falla strlen.
-        if((texto[inicio]=='<') && (init==-1)){
-            init=inicio;
-        }        
-        if((texto[inicio]=='>')&&(close==-1)){
-            close=inicio;
-        }
-        if(init!=-1 && close!=-1){
-            if(es_starter(texto,init,close))
-                 encontre=1;
-            else{
-                init=-1;
-                close=-1;
-            }
-        }
-        inicio++;
-    }
-    int encontre2=0;
-    int init_2=-1;
-    int close_2=-1;
-    while (( (inicio<fin) || (texto[inicio]!='\0')) && ( ! encontre2 ) ) { // por si falla strlen.
-        if((texto[inicio]=='<') && (init_2==-1)){
-            init_2=inicio;
-        }        
-        if((texto[inicio]=='>')&&(close_2==-1)){
-            close_2=inicio;
-        }
-        if(init_2!=-1 && close_2!=-1){
-            if ( same_tag(texto,init+1,close,init_2+1,close_2)){
-                delete_tags(texto,close+1,fin);
-                encontre2=1;
-            }
-            else{
-                  init_2=-1;
-                  close_2=1;
-            }        
-        }
-        inicio++;
-    }    
-    return 0;
-}
-*/
 
 int same_tag(char *texto,int act_init,int act_close,int aux_init,int aux_close){  
     act_init=act_init+2;
@@ -200,11 +130,13 @@ int delete_tags(char *texto, int inicio ,int  fin ){
 }
 
 int  verify(t_list *list){
-    t_list_node *aux = *list;
-    while(aux){
-        delete_tags(aux->data.text , 0 , strlen(aux->data.text)); // 0 : inicio del string ; strlen hasta donde
-        aux=aux->next;
-    }
+    t_iterator it;
+    for (it=list_iterator_init(*list); !list_iterator_end(it); list_iterator_next(&it))
+    {
+      delete_tags(list_iterator_data(it).text , 0 , strlen(list_iterator_data(it).text)); // 0 : inicio del string ; strlen hasta donde
+    } 
+
+
     return 1;
 }
 
@@ -313,7 +245,7 @@ int main (int argc, char* argv[]){
   	    case 'f' : i++;read_file(fin,&subtitle_input); break;
   	    case 'v' : verify(&subtitle_input);break;
   	    case 'm' : printf("se envio m");break;
-  	    case 'o' : i++;printf("se envio -o");break;
+  	    case 'o' : i++;create_file_srt(fout,&subtitle_input);break;
   	    case 's' : printf("se envio s");break;
   	    case 'b' : printf("se envio b");break;
   	    case 'd' : printf("se envio d");break;

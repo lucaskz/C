@@ -1,6 +1,6 @@
-#include "list.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "list.h"
 
 void list_init(t_list *l){
 	*l=NULL;
