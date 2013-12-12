@@ -13,21 +13,18 @@ int create_file(FILE *fout,t_list *list){
     fclose(fout);
     return 1;
 }
-int es_starter(char *texto,int init, int close){
-    int aux=init;
-    aux++;
-    while((texto[aux]==' ')&&(aux<close)){
-        aux++;
-    }
-    if( aux<close && texto[aux]!='/' ){
-        if ( aux+1 <= close ){
-            return 1;
-        }
+
+
+int es_close(char *texto,int init, int close){
+    init++;
+    if( (init+1)<close && texto[init]=='/' ){
+        return 1;
     }
             
     return 0;
 }
 
+/*
 int same_tag(char *texto,int init,int close,int init_2,int close_2){
 
     while( (texto[init]==' ') && init < close ){
@@ -53,7 +50,9 @@ int same_tag(char *texto,int init,int close,int init_2,int close_2){
     
     return 1;
 }
+*/
 
+/*
 int delete_tags(char *texto, int inicio ,int  fin ){
     //int num=inicio;
     int init=-1;
@@ -100,13 +99,112 @@ int delete_tags(char *texto, int inicio ,int  fin ){
     }    
     return 0;
 }
+*/
 
+int same_tag(char *texto,int act_init,int act_close,int aux_init,int aux_close){  
+    act_init=act_init+2;
+    aux_init++;
+    char act=texto[act_init];
+    char aux=texto[aux_init];
+    while ( (act_init < act_close  && aux_init < aux_close ) && ( texto[aux_init]!=' ' && texto[act_init]!=' ' )){
+        if(texto[act_init]!=texto[aux_init])  // <b> .. </i> 
+            return 0;   
+        act_init++;
+        aux_init++;
+        act=texto[act_init];
+        aux=texto[aux_init];
+    }
+    if( texto[act_init]==' ' && aux_init<aux_close ) return 0;  //  <ba> ... </b>
+    
+    if( texto[aux_init]==' ' && act_init<act_close ) return 0;  // <b> .. </ba>
+    
+    return 1;
+}
+
+int clear_tag(char *texto, int act_init,int act_close,int aux_init,int aux_close,int *fin){
+    int i,d;
+    for(i=aux_init,d=aux_close+1;d<*fin;i++,d++){
+        texto[i]=texto[d];
+    }
+    int desplazamiento=aux_close-aux_init+1;
+    *fin=*fin-desplazamiento;
+    act_close=act_close-desplazamiento;
+    act_init=act_init-desplazamiento;
+    for(i=act_init,d=act_close+1;d<*fin;i++,d++){
+        texto[i]=texto[d];
+    }
+    desplazamiento=act_close-act_init+1;
+    *fin=*fin-desplazamiento;
+    texto[*fin]='\0';
+    return 1;
+}
+
+
+int delete_tags(char *texto, int inicio ,int  fin ){
+    int act_init=-1;
+    int act_close=-1;
+    int aux_init=-1;
+    int aux_close=-1;
+    int act=inicio;
+    
+    while  ( act<fin || texto[act]!='\0' ){
+        if((texto[act]=='<') && (act_init==-1)){
+            act_init=act;
+        }        
+        if((texto[act]=='>')&&(act_close==-1)&&(act_init!=-1)){
+            act_close=act;
+        }
+        if(act_init!=-1 && act_close!=-1){
+            if(aux_init==-1 && aux_close==-1){
+                if(es_close(texto,act_init,act_close)){
+                    printf("\n error en : %s",texto);
+                    return 0;
+                } //recibo como primer </> un cierre; esta mal ,termino ejecucion
+                aux_init=act_init;
+                aux_close=act_close;
+                act_init=-1;
+                act_close=-1;
+            }
+            else{
+                if(es_close(texto,act_init,act_close)){
+                    if(same_tag(texto,act_init,act_close,aux_init,aux_close)){
+                        clear_tag(texto,act_init,act_close,aux_init,aux_close,&fin);
+                        aux_init=-1;
+                        aux_close=-1;
+                        act_init=-1;
+                        act_close=-1;
+                        act=inicio;
+                    }
+                    else{
+                        printf("\n no cumple %s",texto);
+                        return 0;
+                    }
+                }
+                else{
+                    aux_init=act_init;
+                    aux_close=act_close;
+                    act_init=-1;
+                    act_close=-1;
+                }
+            }
+            
+        }
+        act++;
+    }
+    if ((act_init==-1 || act_close==-1 ) && ( aux_init!=-1 || aux_close!=-1)){
+        printf("\n no cumple %s",texto);
+            return 0;
+            
+    }
+    printf("\n cumple %s",texto);
+}
 
 int  verify(t_list *list){
     t_list_node *aux = *list;
     while(aux){
         delete_tags(aux->data.text , 0 , strlen(aux->data.text)); // 0 : inicio del string ; strlen hasta donde
-    };
+        aux=aux->next;
+    }
     return 1;
 }
 
@@ -215,7 +313,7 @@ int main (int argc, char* argv[]){
   	    case 'f' : i++;read_file(fin,&subtitle_input); break;
   	    case 'v' : verify(&subtitle_input);break;
   	    case 'm' : printf("se envio m");break;
-  	    case 'o' : i++;create_file(fout,&subtitle_input);break;
+  	    case 'o' : i++;printf("se envio -o");break;
   	    case 's' : printf("se envio s");break;
   	    case 'b' : printf("se envio b");break;
   	    case 'd' : printf("se envio d");break;
