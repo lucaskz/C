@@ -149,7 +149,7 @@ int delete_tags(char *texto, int inicio ,int  fin ){
     
     while  ( act<fin || texto[act]!='\0' ){
         if((texto[act]=='<') && (act_init==-1)){
-            act_init=act;
+            if(act+1<=fin &&texto[act+1]!=' ')act_init=act;            
         }        
         if((texto[act]=='>')&&(act_close==-1)&&(act_init!=-1)){
             act_close=act;
@@ -173,7 +173,7 @@ int delete_tags(char *texto, int inicio ,int  fin ){
                         aux_close=-1;
                         act_init=-1;
                         act_close=-1;
-                        act=inicio;
+                        act=inicio-1; // por el act++..
                     }
                     else{
                         printf("\n no cumple %s",texto);
