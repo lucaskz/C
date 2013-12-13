@@ -8,8 +8,7 @@
 int create_file_srt(FILE *fout,t_list *list){
     t_iterator it;
     for (it=list_iterator_init(*list); !list_iterator_end(it); list_iterator_next(&it))
-    {
-     
+    {     
         fprintf(fout,"%d\n%.2d:%.2d:%.2d,%.3d --> %.2d:%.2d:%.2d,%.3d\n%s\n",list_iterator_data(it).indice,
                                                             list_iterator_data(it).start.hora,list_iterator_data(it).start.min,
                                                             list_iterator_data(it).start.seg,list_iterator_data(it).start.mil,
