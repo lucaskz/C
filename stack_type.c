@@ -1,12 +1,24 @@
 #include "stack_type.h"
 #include <stdio.h>
 
+int stack_init_empty(s_data s){
+    return s.init==-1;
+}
+
+int stack_close_empty(s_data s){
+    return s.close==-1;
+}
+
 int stack_get_init(s_data s){
     return s.init;
 }
 
 int stack_get_close(s_data s){
     return s.close;
+}
+
+int stack_data_empty(s_data s){
+    return (stack_init_empty(s) || stack_close_empty(s));
 }
 
 void stack_set_close(s_data *s,int n){

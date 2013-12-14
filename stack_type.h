@@ -13,6 +13,10 @@ typedef struct {
     int close;
 } s_data ;
 
+int stack_init_empty(s_data );
+
+int stack_close_empty(s_data );
+
 int stack_get_init(s_data);
 
 int stack_get_close(s_data);
@@ -22,6 +26,8 @@ void stack_set_close(s_data);
 void stack_set_init(s_data *);
 
 void stack_data_init(s_data *);
+
+int stack_data_empty(s_data);
 
 void stack_set_data(s_data *,s_data );
 

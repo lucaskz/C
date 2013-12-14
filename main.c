@@ -3,6 +3,7 @@
 #include <string.h>
 #include "list.h"
 #include "list_iterator.h"
+#include "stack.h"
 
 
 int create_file_srt(FILE *fout,t_list *list){
@@ -21,7 +22,7 @@ int create_file_srt(FILE *fout,t_list *list){
 }
 
 
-int es_close(char *texto,int init, int close){
+int es_close(char *texto,s_data actual){
     init++;
     if( (init+1)<close && texto[init]=='/' ){
         return 1;
@@ -50,7 +51,7 @@ int same_tag(char *texto,int act_init,int act_close,int aux_init,int aux_close){
     return 1;
 }
 
-int clear_tag(char *texto, int act_init,int act_close,int aux_init,int aux_close,int *fin){
+int clear_tag(char *texto, s_data actual,s_data anterior,int *fin){
     int i,d;
     for(i=aux_init,d=aux_close+1;d<*fin;i++,d++){
         texto[i]=texto[d];
@@ -69,70 +70,50 @@ int clear_tag(char *texto, int act_init,int act_close,int aux_init,int aux_close
 }
 
 
-int delete_tags(char *texto, int inicio ,int  fin ){
-    int act_init=-1;
-    int act_close=-1;
-    int aux_init=-1;
-    int aux_close=-1;
-    int act=inicio;
+int verify_tag_html(char *texto, int inicio ,int  fin ){
     
-    while  ( act<fin || texto[act]!='\0' ){
-        if((texto[act]=='<') && (act_init==-1)){
-            if(act+1<=fin &&texto[act+1]!=' ')act_init=act;            
+    t_stack pila;
+    s_data actual,anterior;
+    int indice=inicio;
+    
+    stack_data_init(&actual);
+    
+    while  ( indice<fin || texto[indice]!='\0' ){
+        if((texto[indice]=='<') && (stack_init_empty(actual))){
+            if(indice+1<=fin && texto[indice+1]!=' ')stack_set_init(&actual,indice);            
         }        
-        if((texto[act]=='>')&&(act_close==-1)&&(act_init!=-1)){
-            act_close=act;
+        if((texto[indice]=='>')&&(stack_close_empty(actual))&&(!stack_init_empty(actual))){
+            stack_set_close(&actual,indice);
         }
-        if(act_init!=-1 && act_close!=-1){
-            if(aux_init==-1 && aux_close==-1){
-                if(es_close(texto,act_init,act_close)){
-                    printf("\n error en : %s",texto);
-                    return 0;
-                } //recibo como primer </> un cierre; esta mal ,termino ejecucion
-                aux_init=act_init;
-                aux_close=act_close;
-                act_init=-1;
-                act_close=-1;
+        if(!stack_init_empty(actual) && !stack_close_empty(actual)){
+            if(es_close(texto,actual)){
+                if( stack_empty(pila) ){
+                    return 0; // error de subtitulo </> sin apertura de tag.
+                }  
+                else{
+                    anterior=stack_pop(&pila);
+                    same_tag(texto,actual,anterior) ? clear_tag(texto,actual,anterior) : stack_push(&pila,actual);
+                    stack_data_init(&actual);
+                    stack_data_init(&anterior);
+                }
             }
             else{
-                if(es_close(texto,act_init,act_close)){
-                    if(same_tag(texto,act_init,act_close,aux_init,aux_close)){
-                        clear_tag(texto,act_init,act_close,aux_init,aux_close,&fin);
-                        aux_init=-1;
-                        aux_close=-1;
-                        act_init=-1;
-                        act_close=-1;
-                        act=inicio-1; // por el act++..
-                    }
-                    else{
-                        printf("\n no cumple %s",texto);
-                        return 0;
-                    }
-                }
-                else{
-                    aux_init=act_init;
-                    aux_close=act_close;
-                    act_init=-1;
-                    act_close=-1;
-                }
+                stack_push(&pila,actual);
             }
-            
         }
-        act++;
+        indice++;
+    }    
+    if ( !stack_data_empty(actual) && ( !stack_empty(pila) )){ // quedaron elementos sin matchear
+        return 0;            
     }
-    if ((act_init==-1 || act_close==-1 ) && ( aux_init!=-1 || aux_close!=-1)){
-        printf("\n no cumple %s",texto);
-            return 0;
-            
-    }
-    printf("\n cumple %s",texto);
+    return 1;  // el subtitulo es valido
 }
 
-int  verify(t_list *list){
+int  verify_webvtt(t_list *list){
     t_iterator it;
     for (it=list_iterator_init(*list); !list_iterator_end(it); list_iterator_next(&it))
     {
-      delete_tags(list_iterator_data(it).text , 0 , strlen(list_iterator_data(it).text)); // 0 : inicio del string ; strlen hasta donde
+      verify_tag_html(list_iterator_data(it).text , 0 , strlen(list_iterator_data(it).text)); // 0 : inicio del string ; strlen hasta donde
     } 
     return 1;
 }
@@ -240,7 +221,7 @@ int main (int argc, char* argv[]){
   	if ((argv[i][0]=='-') && (strlen(argv[i])==2) ){
   	  switch (argv[i][1]) {
   	    case 'f' : i++;read_file_webvtt(fin,&subtitle_input); break;
-  	    case 'v' : verify(&subtitle_input);break;
+  	    case 'v' : verify_webvtt(&subtitle_input);break;
   	    case 'm' : printf("se envio m");break;
   	    case 'o' : i++;create_file_srt(fout,&subtitle_input);break;
   	    case 's' : printf("se envio s");break;
