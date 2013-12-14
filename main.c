@@ -134,12 +134,10 @@ int  verify(t_list *list){
     {
       delete_tags(list_iterator_data(it).text , 0 , strlen(list_iterator_data(it).text)); // 0 : inicio del string ; strlen hasta donde
     } 
-
-
     return 1;
 }
 
-int read_file(FILE *fin,t_list *list){
+int read_file_webvtt(FILE *fin,t_list *list){
   
   char *buffer=NULL, *texto = NULL;
   ssize_t leidos=0;
@@ -202,7 +200,7 @@ int read_file(FILE *fin,t_list *list){
     size_texto=0;
      
   }
-  // subtitle_free(&subtitle);
+  subtitle_free(&subtitle);
   
   
 
@@ -241,7 +239,7 @@ int main (int argc, char* argv[]){
   for(i=1; i < argc;i++){
   	if ((argv[i][0]=='-') && (strlen(argv[i])==2) ){
   	  switch (argv[i][1]) {
-  	    case 'f' : i++;read_file(fin,&subtitle_input); break;
+  	    case 'f' : i++;read_file_webvtt(fin,&subtitle_input); break;
   	    case 'v' : verify(&subtitle_input);break;
   	    case 'm' : printf("se envio m");break;
   	    case 'o' : i++;create_file_srt(fout,&subtitle_input);break;
