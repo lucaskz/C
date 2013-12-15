@@ -9,6 +9,50 @@ int subtitle_free(t_data *subtitle ){
   return 1;
 }
 
+int get_stime_hour(t_data d){
+    return d.start.hora;
+}
+
+int get_stime_min(t_data d){
+    return d.start.min;
+}
+
+int get_stime_mil(t_data d){
+    return d.start.mil;
+}
+
+int get_stime_seg(t_data d){
+    return d.start.seg;
+}
+
+int get_etime_hour(t_data d){
+    return d.end.hora;
+}
+
+int get_etime_min(t_data d){
+    return d.end.min;
+}
+
+int get_etime_mil(t_data d){
+    return d.end.mil;
+}
+
+int get_etime_sec(t_data d){
+    return d.end.seg;
+}
+
+char* get_texto(t_data d){
+    return d.text;
+}
+
+char* get_label(t_data d){
+    return d.label;
+}
+
+int get_indice(t_data d){
+    return d.indice;
+}
+
 
 int subtitle_init(t_data *subtitle){
     subtitle->label=NULL;
