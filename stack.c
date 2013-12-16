@@ -31,3 +31,11 @@ int stack_empty(t_stack s){
     return s==NULL;
 }
 
+void stack_free(t_stack *s){
+	t_stack_node *data = *s;
+	while(data){
+		t_stack_node *aux = data;
+		data = data->next;
+		free(aux);
+	}
+}

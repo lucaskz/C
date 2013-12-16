@@ -12,4 +12,6 @@ void stack_push(t_stack *, s_data);
 
 s_data stack_pop(t_stack *);
 
+void stack_free(t_stack *);
+
 #endif

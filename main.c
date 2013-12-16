@@ -60,27 +60,26 @@ int clear_tag(char *texto, int act_init, int act_close, int ant_init, int ant_cl
     for (i = ant_init, d = ant_close + 1; d<*fin; i++, d++) {
         texto[i] = texto[d];
     }
-    int desplazamiento = ant_close - ant_init + 1;
-    *fin = *fin - desplazamiento;
-    act_close = act_close - desplazamiento;
-    act_init = act_init - desplazamiento;
+    int desplazamiento1 = ant_close - ant_init + 1;
+    *fin = *fin - desplazamiento1;
+    act_close = act_close - desplazamiento1;
+    act_init = act_init - desplazamiento1;
     for (i = act_init, d = act_close + 1; d<*fin; i++, d++) {
         texto[i] = texto[d];
     }
-    desplazamiento = act_close - act_init + 1;
-    *fin = *fin - desplazamiento;
+    int desplazamiento2 = act_close - act_init + 1;
+    *fin = *fin - desplazamiento2;
     texto[*fin] = '\0';
-    return 1;
+    return desplazamiento2+desplazamiento1;
 }
 
 void invalid_text(char *texto) {
-    if(strlen(texto)>=20){
-       strcpy(texto,"Subtitulo Incorrecto");
-    }
-    else{
-        texto = realloc (texto, ( strlen(texto) + 21 ) * sizeof(char) ) ;
-        strcpy(texto,"Subtitulo Incorrecto");
-        texto[21]='\0';
+    if (strlen(texto) >= 20) {
+        strcpy(texto, "Subtitulo Incorrecto\r\n");
+    } else {
+        texto = realloc(texto, (strlen(texto) + 21) * sizeof (char));
+        strcpy(texto, "Subtitulo Incorrecto\r\n");
+        texto[21] = '\0';
     }
 }
 
@@ -89,7 +88,7 @@ int verify_tag_html(char *texto, int inicio, int fin) {
     t_stack pila;
     s_data actual, anterior;
     int indice = inicio;
-
+    stack_init(&pila);
     stack_data_init(&actual);
 
     while (indice < fin || texto[indice] != '\0') {
@@ -98,26 +97,31 @@ int verify_tag_html(char *texto, int inicio, int fin) {
         }
         if ((texto[indice] == '>')&&(stack_close_empty(actual))&&(!stack_init_empty(actual))) {
             stack_set_close(&actual, indice);
+            if (stack_empty(pila)) {
+                stack_push(&pila, actual);
+                stack_data_init(&actual);
+            }
         }
-        if (!stack_init_empty(actual) && !stack_close_empty(actual)) {
+        if (!stack_data_empty(actual) && !stack_empty(pila)) {
             if (es_close(texto, actual)) {
                 if (stack_empty(pila)) {
                     invalid_text(texto);
                     return 0; // error de subtitulo </> sin apertura de tag.
                 } else {
                     anterior = stack_pop(&pila);
-                    same_tag(texto,stack_get_init(actual),stack_get_close(actual) , stack_get_init(anterior),stack_get_close(anterior) ) ? clear_tag(texto, stack_get_init(actual), stack_get_close(actual), stack_get_init(anterior), stack_get_close(anterior),&fin) : stack_push(&pila, actual);
+                    same_tag(texto, stack_get_init(actual), stack_get_close(actual), stack_get_init(anterior), stack_get_close(anterior)) ? indice=indice - clear_tag(texto, stack_get_init(actual), stack_get_close(actual), stack_get_init(anterior), stack_get_close(anterior), &fin) : stack_push(&pila, actual);
                     stack_data_init(&actual);
-                    stack_data_init(&anterior);
                 }
             } else {
                 stack_push(&pila, actual);
+                stack_data_init(&actual);
             }
         }
         indice++;
     }
-    if (!stack_data_empty(actual) && (!stack_empty(pila))) { // quedaron elementos sin matchear
+    if (!stack_empty(pila)) { // quedaron elementos sin matchear
         invalid_text(texto);
+        stack_free(&pila);
         return 0;
     }
     return 1; // el subtitulo es valido
@@ -125,7 +129,7 @@ int verify_tag_html(char *texto, int inicio, int fin) {
 
 int verify_webvtt(t_list *list) {
     t_iterator it;
-    for (it = list_iterator_init(*list); !list_iterator_end(it); list_iterator_next(&it)) {
+    for (it = list_iterator_init(*list); !list_iterator_end(it); list_iterator_next(&it)) {        
         verify_tag_html(get_texto(list_iterator_data(it)), 0, strlen(get_texto(list_iterator_data(it)))); // 0 : inicio del string ; strlen hasta donde
     }
     return 1;
@@ -139,20 +143,32 @@ int read_file_webvtt(FILE *fin, t_list *list) {
     size_t alocados = 10;
     int tiempo_leido, indice = 1;
     int size_texto = 0;
+    
+    list_init(list);
 
     if (!feof(fin)) leidos = getline(&buffer, &alocados, fin);
-    if ( scanf(buffer, "WEBVTT %s") == EOF || leidos >= 0) { // mejorar
-        printf("Error de formato de archivo");
-        free(buffer);
-        return 0;
+    if (leidos >= 0 ) { // primera linea con solamente WEBVTT y \n o \r.. etc
+        char *aux = malloc((leidos + 1) * sizeof (char));
+        int indice=0;
+        while( buffer[indice]!=' ' && buffer[indice]!= '\n' && buffer[indice]!='\r' && buffer[indice]!='\0'){
+            aux[indice]=buffer[indice];
+            indice++;
+        }
+        if (strcmp(aux, "WEBVTT") != 0) {
+            printf("Error de formato de archivo");
+            free(buffer);
+            free(aux);
+            return 0;
+        }
+        free(aux);
     }
     leidos = getline(&buffer, &alocados, fin);
-    if (scanf(buffer, "\n") ==EOF || leidos >= 0) {
+    char act=buffer[0];
+    if ( leidos >= 0 && buffer[1]!='\n') {
         free(buffer);
         printf("Error de formato de archivo");
         return 0;
     }
-    list_init(list);
     subtitle_init(&subtitle);
     while (!feof(fin) && leidos >= 0) {
 
@@ -211,12 +227,9 @@ int read_file_webvtt(FILE *fin, t_list *list) {
 }
 
 int main(int argc, char* argv[]) {
-    wint_t test=( wint_t) argv[1][1];
-    wprintf(L"%c%c", test);
-    return 1;
     FILE *fin, *fout;
     t_list subtitle_input;
-    int in = 0, out = 0,webvtt=0;
+    int in = 0, out = 0, webvtt = 1;
 
     if (argc <= 1) {
         printf("Faltan parametros use -help para mas ayuda");
@@ -225,7 +238,7 @@ int main(int argc, char* argv[]) {
 
     /* primer pasada */
     int i;
-    for (i = 1; i < argc; i++) {         
+    for (i = 1; i < argc; i++) {
         if (!(strcmp(argv[i], "-f")) && (argc > (i + 1))) {
             if (in == 0) {
                 in = 1;
@@ -233,7 +246,7 @@ int main(int argc, char* argv[]) {
                 continue;
             } else {
                 printf("Se enviaron 2 archivos de lectura"); //test
-                if(fout) fclose(fout);
+                if (fout) fclose(fout);
                 fclose(fin);
                 return 0;
             }
@@ -245,21 +258,21 @@ int main(int argc, char* argv[]) {
                 continue;
             } else {
                 printf("Se enviaron 2 archivos de salida");
-                if(fin) fclose(fin);
+                if (fin) fclose(fin);
                 fclose(fout);
                 return 0;
             }
         }
-        if ((argv[i][0]=='-' && argv[i][1]==(char)234) && (argc > (i + 1))) {
-            webvtt=1;
+        if ((argv[i][0] == '-' && argv[i][1] == (char) 234) && (argc > (i + 1))) {
+            webvtt = 1;
         }
     }
     if (!fin) {
         printf("No se pudo abrir el archivo de entrada");
         return 0;
     }
-    
-    if(!webvtt){
+
+    if (!webvtt) {
         printf("Funcionalidad del TPI");
         return 0;
     }
