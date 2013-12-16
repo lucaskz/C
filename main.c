@@ -180,8 +180,9 @@ int read_file_webvtt(FILE *fin, t_list *list) {
 
 
         tiempo_leido = 0;
-        while (leidos >= 0 && !tiempo_leido) {
+        while (leidos >= 0 && !tiempo_leido ) {
             leidos = getline(&buffer, &alocados, fin);
+            if (*buffer == '\n' || *buffer == '\r') break;
             int tiempo = es_tiempo(buffer);
             if (tiempo) {
                 if (tiempo == 1) {
