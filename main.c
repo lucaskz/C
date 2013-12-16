@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
 #include "list.h"
 #include "list_iterator.h"
 #include "stack.h"
@@ -210,7 +211,9 @@ int read_file_webvtt(FILE *fin, t_list *list) {
 }
 
 int main(int argc, char* argv[]) {
-
+    wint_t test=( wint_t) argv[1][1];
+    wprintf(L"%c%c", test);
+    return 1;
     FILE *fin, *fout;
     t_list subtitle_input;
     int in = 0, out = 0,webvtt=0;
@@ -222,7 +225,7 @@ int main(int argc, char* argv[]) {
 
     /* primer pasada */
     int i;
-    for (i = 1; i < argc; i++) {
+    for (i = 1; i < argc; i++) {         
         if (!(strcmp(argv[i], "-f")) && (argc > (i + 1))) {
             if (in == 0) {
                 in = 1;
@@ -247,7 +250,7 @@ int main(int argc, char* argv[]) {
                 return 0;
             }
         }
-        if (!(strcmp(argv[i], "-Ω")) && (argc > (i + 1))) {
+        if ((argv[i][0]=='-' && argv[i][1]==(char)234) && (argc > (i + 1))) {
             webvtt=1;
         }
     }
