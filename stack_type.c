@@ -22,20 +22,20 @@ int stack_data_empty(s_data s){
 }
 
 void stack_set_close(s_data *s,int n){
-    *s.close=n;
+    s->close=n;
 }
 
 void stack_set_init(s_data *s,int n){
-    *s->init=n;
+    s->init=n;
 }
 
 
 void stack_data_init(s_data *s){
-    *s.init=-1;
-    *s.close=-1;
+    s->init=-1;
+    s->close=-1;
 }
 
 void stack_set_data(s_data *s,s_data a){
-    *s.close=a.close;
-    *s.init=a.init;
+    s->close=a.close;
+    s->init=a.init;
 }

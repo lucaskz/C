@@ -10,7 +10,7 @@ int create_file_srt(FILE *fout, t_list *list) {
     for (it = list_iterator_init(*list); !list_iterator_end(it); list_iterator_next(&it)) {
         fprintf(fout, "%d\n%.2d:%.2d:%.2d,%.3d --> %.2d:%.2d:%.2d,%.3d\n%s\n", get_indice(list_iterator_data(it)),
                 get_stime_hour(list_iterator_data(it)), get_stime_min(list_iterator_data(it)),
-                get_stime_seg(list_iterator_data(it)), get_stime_mil(list_iterator_data(it)),
+                get_stime_sec(list_iterator_data(it)), get_stime_mil(list_iterator_data(it)),
                 get_etime_hour(list_iterator_data(it)), get_etime_min(list_iterator_data(it)), get_etime_sec(list_iterator_data(it)),
                 get_etime_mil(list_iterator_data(it)), get_texto(list_iterator_data(it)));
     }
@@ -48,7 +48,7 @@ int same_tag(char *texto, int act_init, int act_close, int ant_init, int ant_clo
     return 1;
 }
 
-int clear_tag(char *texto, int act_init, int ant_close, int ant_init, int aux_close, int *fin) {
+int clear_tag(char *texto, int act_init, int act_close, int ant_init, int ant_close, int *fin) {
     /*
      act_init    </ ....  
      act_close   ...>
@@ -56,17 +56,17 @@ int clear_tag(char *texto, int act_init, int ant_close, int ant_init, int aux_cl
      ant_close   ...>
      */
     int i, d;
-    for (i = ant_init, d = aux_close + 1; d<*fin; i++, d++) {
+    for (i = ant_init, d = ant_close + 1; d<*fin; i++, d++) {
         texto[i] = texto[d];
     }
-    int desplazamiento = aux_close - ant_init + 1;
+    int desplazamiento = ant_close - ant_init + 1;
     *fin = *fin - desplazamiento;
-    ant_close = ant_close - desplazamiento;
+    act_close = act_close - desplazamiento;
     act_init = act_init - desplazamiento;
-    for (i = act_init, d = ant_close + 1; d<*fin; i++, d++) {
+    for (i = act_init, d = act_close + 1; d<*fin; i++, d++) {
         texto[i] = texto[d];
     }
-    desplazamiento = ant_close - act_init + 1;
+    desplazamiento = act_close - act_init + 1;
     *fin = *fin - desplazamiento;
     texto[*fin] = '\0';
     return 1;
@@ -74,12 +74,12 @@ int clear_tag(char *texto, int act_init, int ant_close, int ant_init, int aux_cl
 
 void invalid_text(char *texto) {
     if(strlen(texto)>=20){
-        strcpy(texto,"Subtitulo Incorrecto");
+       strcpy(texto,"Subtitulo Incorrecto");
     }
     else{
         texto = realloc (texto, ( strlen(texto) + 21 ) * sizeof(char) ) ;
         strcpy(texto,"Subtitulo Incorrecto");
-        texto[21]=='\0';
+        texto[21]='\0';
     }
 }
 
@@ -105,7 +105,7 @@ int verify_tag_html(char *texto, int inicio, int fin) {
                     return 0; // error de subtitulo </> sin apertura de tag.
                 } else {
                     anterior = stack_pop(&pila);
-                    same_tag(texto, actual, anterior) ? clear_tag(texto, stack_get_init(actual), stack_get_close(actual), stack_get_init(anterior), stack_get_close(anterior)) : stack_push(&pila, actual);
+                    same_tag(texto,stack_get_init(actual),stack_get_close(actual) , stack_get_init(anterior),stack_get_close(anterior) ) ? clear_tag(texto, stack_get_init(actual), stack_get_close(actual), stack_get_init(anterior), stack_get_close(anterior),&fin) : stack_push(&pila, actual);
                     stack_data_init(&actual);
                     stack_data_init(&anterior);
                 }
@@ -146,7 +146,7 @@ int read_file_webvtt(FILE *fin, t_list *list) {
         return 0;
     }
     leidos = getline(&buffer, &alocados, fin);
-    if (strcmp(buffer, '\n') != 0 || leidos >= 0) {
+    if (scanf(buffer, "\n") ==EOF || leidos >= 0) {
         free(buffer);
         printf("Error de formato de archivo");
         return 0;

@@ -38,7 +38,7 @@ int get_etime_min(t_data);
 
 int get_etime_mil(t_data);
 
-int get_etime_seg(t_data);
+int get_etime_sec(t_data);
 
 char* get_texto(t_data);
 
@@ -46,7 +46,7 @@ char* get_label(t_data);
 
 int get_indice(t_data);
 
-int subtitle_free(t_data);
+int subtitle_free(t_data *);
 
 int es_tiempo(char *);
 

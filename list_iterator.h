@@ -1,15 +1,13 @@
 #ifndef _T_LIST_ITERATOR_H
 #define _T_LIST_ITERATOR_H
-
-
 #include "list.h"
-
-/* Incluimos la definicion del tipo desacopladamente */
-#ifdef _LIST_TYPE_LINKED_NODES_H
-
 #include "list_iterator_type_linked_nodes.h"
 
-#endif
+/* Incluimos la definicion del tipo desacopladamente */
+
+
+
+
 
 typedef struct {
   t_list list;

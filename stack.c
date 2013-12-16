@@ -1,11 +1,12 @@
 #include "stack.h"
+#include <stdlib.h>
 #include <stdio.h>
 
 void stack_init(t_stack *s){
     *s=NULL;
 }
 
-int stack_top(t_stack s){
+s_data stack_top(t_stack s){
     return s->data;
 }
 
@@ -18,7 +19,7 @@ void stack_push(t_stack *s, s_data d){
 }
 
 s_data stack_pop(t_stack *s){
-    t_stack *top=*s;
+    t_stack_node *top=*s;
     s_data aux;
     stack_set_data(&aux,top->data);
     *s=top->next;

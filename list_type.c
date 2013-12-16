@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#ifndef _T_LIST_H
 #include "list.h"
+#endif
 
 int subtitle_free(t_data *subtitle ){
     if(subtitle->text!= NULL) free(subtitle->text);   
@@ -21,7 +23,7 @@ int get_stime_mil(t_data d){
     return d.start.mil;
 }
 
-int get_stime_seg(t_data d){
+int get_stime_sec(t_data d){
     return d.start.seg;
 }
 
