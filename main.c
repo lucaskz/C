@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <locale.h>
 #include "list.h"
 #include "list_iterator.h"
 #include "stack.h"
@@ -163,10 +162,18 @@ int read_file_webvtt(FILE *fin, t_list *list) {
         free(aux);
     }
     leidos = getline(&buffer, &alocados, fin);
-    if ( leidos >= 0 && (buffer[0]!='\n'|| (buffer[0]=='\r' && buffer[1]!='\n') )) {
-        free(buffer);
-        printf("Error de formato de archivo\n");
-        return 0;
+    if (leidos >= 0) {
+        int indice = 0;        
+        char blank_line=buffer[0];
+        while (buffer[0] != '\0' && buffer[0] == '\r' && indice < leidos) {
+            blank_line = buffer[indice];
+            indice++;
+        }
+        if (blank_line != '\n') { // molesto caso para las diferencias entre windows y linux con el \r
+            free(buffer);
+            printf("Error de formato de archivo\n");
+            return 0;
+        }
     }
     subtitle_init(&subtitle);
     while (!feof(fin) && leidos >= 0) {
@@ -276,10 +283,12 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    
     if (webvtt<0) {
         printf("Funcionalidad del TPI\n");
         return 0;
     }
+    
 
     for (i = 1; i < argc; i++) {
         if(i==webvtt) continue;
@@ -291,14 +300,15 @@ int main(int argc, char* argv[]) {
                         fclose(fin);
                         return 0;
                     }
+                    verify_webvtt(&subtitle_input);
                     fclose(fin);
                     break;
-                case 'v': verify_webvtt(&subtitle_input);
+                case 'v': printf("Funcionalidad del TPI\n");
                     break;
                 case 'm': printf("Funcionalidad del TPI\n");
                     break;
                 case 'o': i++;
-                    //create_file_srt(fout, &subtitle_input);
+                    create_file_srt(fout, &subtitle_input);
                     break;
                 case 's': printf("Funcionalidad del TPI\n");
                     break;
