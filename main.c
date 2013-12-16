@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <wchar.h>
+#include <locale.h>
 #include "list.h"
 #include "list_iterator.h"
 #include "stack.h"
@@ -155,7 +155,7 @@ int read_file_webvtt(FILE *fin, t_list *list) {
             indice++;
         }
         if (strcmp(aux, "WEBVTT") != 0) {
-            printf("Error de formato de archivo");
+            printf("Error de formato de archivo\n");
             free(buffer);
             free(aux);
             return 0;
@@ -163,10 +163,9 @@ int read_file_webvtt(FILE *fin, t_list *list) {
         free(aux);
     }
     leidos = getline(&buffer, &alocados, fin);
-    char act=buffer[0];
-    if ( leidos >= 0 && buffer[1]!='\n') {
+    if ( leidos >= 0 && (buffer[0]!='\n'|| (buffer[0]=='\r' && buffer[1]!='\n') )) {
         free(buffer);
-        printf("Error de formato de archivo");
+        printf("Error de formato de archivo\n");
         return 0;
     }
     subtitle_init(&subtitle);
@@ -189,7 +188,7 @@ int read_file_webvtt(FILE *fin, t_list *list) {
             }
         }
         if (!tiempo_leido) {
-            printf("Error de estructura de archivo webvtt");
+            printf("Error de estructura de archivo webvtt\n");
             free(buffer);
             return 0;
         }
@@ -226,13 +225,14 @@ int read_file_webvtt(FILE *fin, t_list *list) {
     return 1;
 }
 
+
+
 int main(int argc, char* argv[]) {
     FILE *fin, *fout;
     t_list subtitle_input;
-    int in = 0, out = 0, webvtt = 1;
-
+    int in = 0, out = 0, webvtt = -1;
     if (argc <= 1) {
-        printf("Faltan parametros use -help para mas ayuda");
+        printf("Faltan parametros use -help para mas ayuda\n");
         return 0;
     }
 
@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
                 fin = fopen(argv[i + 1], "r");
                 continue;
             } else {
-                printf("Se enviaron 2 archivos de lectura"); //test
+                printf("Se enviaron 2 archivos de lectura\n"); //test
                 if (fout) fclose(fout);
                 fclose(fin);
                 return 0;
@@ -257,28 +257,33 @@ int main(int argc, char* argv[]) {
                 fout = fopen(argv[i + 1], "w");
                 continue;
             } else {
-                printf("Se enviaron 2 archivos de salida");
+                printf("Se enviaron 2 archivos de salida\n");
                 if (fin) fclose(fin);
                 fclose(fout);
                 return 0;
             }
         }
-        if ((argv[i][0] == '-' && argv[i][1] == (char) 234) && (argc > (i + 1))) {
-            webvtt = 1;
+        if (argv[i][0] == '-' && (unsigned char)argv[i][1]==206 ) {
+            if(webvtt<=0) webvtt = i;
+            else {
+                printf("Cantidad de parametros omega invalida\n");
+                return 0;
+            }
         }
     }
     if (!fin) {
-        printf("No se pudo abrir el archivo de entrada");
+        printf("No se pudo abrir el archivo de entrada\n");
         return 0;
     }
 
-    if (!webvtt) {
-        printf("Funcionalidad del TPI");
+    if (webvtt<0) {
+        printf("Funcionalidad del TPI\n");
         return 0;
     }
 
     for (i = 1; i < argc; i++) {
-        if ((argv[i][0] == '-') && (strlen(argv[i]) == 2)) {
+        if(i==webvtt) continue;
+        if ((argv[i][0] == '-') && (strlen(argv[i]) == 2)) {            
             switch (argv[i][1]) {
                 case 'f': i++;
                     if (!read_file_webvtt(fin, &subtitle_input)) { // se encontro algun error de estructura se termina el programa
@@ -290,25 +295,25 @@ int main(int argc, char* argv[]) {
                     break;
                 case 'v': verify_webvtt(&subtitle_input);
                     break;
-                case 'm': printf("Funcionalidad del TPI");
+                case 'm': printf("Funcionalidad del TPI\n");
                     break;
                 case 'o': i++;
-                    create_file_srt(fout, &subtitle_input);
+                    //create_file_srt(fout, &subtitle_input);
                     break;
-                case 's': printf("Funcionalidad del TPI");
+                case 's': printf("Funcionalidad del TPI\n");
                     break;
-                case 'b': printf("Funcionalidad del TPI");
+                case 'b': printf("Funcionalidad del TPI\n");
                     break;
-                case 'd': printf("Funcionalidad del TPI");
+                case 'd': printf("Funcionalidad del TPI\n");
                     break;
-                case 'M': printf("Funcionalidad del TPI");
-                    break;
-                default: printf("Parametro invalido use -help para mas ayuda");
+                case 'M': printf("Funcionalidad del TPI\n");
+                    break;  
+                default: printf("Parametro invalido use -help para mas ayuda\n");
                     return 3;
                     break;
             }
         } else {
-            printf("Parametro invalido use -help para mas ayuda");
+            printf("Parametro invalido use -help para mas ayuda\n");
             return 0;
         }
 
